@@ -31,35 +31,41 @@ function todoReducer(state = [], action) {
   return state;
 }
 
-function useReducer(state = [], action) {
+function userReducer(state = [], action) {
   if (action.type == ADD_USER) {
-    const todoText = action.payload.userName;
+    const userName = action.payload.userName;
     return [
       ...state,
       {
         name: userName,
-        isFinished: false,
         id: state.length == 0 ? 1 : state[state.length - 1].id + 1,
       },
     ];
   }
   return state;
 }
-
 // action objects -> action methods(action creator)
-const addTodo = () => ({ type: ADD_TODO, payload: { todoText: 'todo 1' } });
-const { dispatch, subscribe, getState, replaceReducer } = createStore(
-  todoReducer,
-  []
-);
-subscribe(() => console.log(getState()));
+const addTodo = (todoText) => ({ type: ADD_TODO, payload: { todoText } });
+const deleteTodo = (id) => ({ type: DEL_TODO, payload: { todoId: id } });
+const addUser = (name) => ({ type: ADD_USER, payload: { userName: name } });
 
-// dispatch({ type: ADD_TODO, payload: { todoText: 'todo 1' } });
-// // console.log(getState()); subscribe is doing this work
+// stage 1
+// const { dispatch, subscribe, getState, replaceReducer } = createStore(
+//   todoReducer,
+//   []
+// );
 
-// dispatch({ type: ADD_TODO, payload: { todoText: 'todo 2' } });
-//console.log(getState());
+// created
+const reducer = combineReducers({ todoReducer, users: userReducer });
 
-dispatch(add);
-dispatch({ type: DEL_TODO, payload: { todoId: 1 } });
-//console.log(getState());
+// stage 2
+const { dispatch, subscribe, getState, replaceReducer } = createStore(reducer);
+subscribe(() => console.log(getState())); // executes this callback
+
+const actions = bindActionCreators({ addTodo, deleteTodo, addUser }, dispatch);
+
+actions.addTodo('todo 1');
+actions.addUser('sumit');
+actions.addTodo('todo 2');
+
+actions.deleteTodo(1);
